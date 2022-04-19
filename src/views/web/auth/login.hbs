@@ -1,0 +1,103 @@
+<html>
+
+<head>
+    <title>Timedoor Challenge - Level 8 | Login</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/tmdrPreset.css">
+    <!-- CSS End -->
+
+    <!-- Javascript -->
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <!-- Javascript End -->
+</head>
+
+<body id="login">
+    <div class="box login-box">
+        <div class="login-box-head">
+            <h1 class="mb-5">Login</h1>
+            <p class="text-lgray">Please login to continue...</p>
+        </div>
+        <form id="form-login">
+            <div class="login-box-body">
+                <div class="form-group">
+                    <input type="text" name="email" class="form-control" placeholder="Email">
+                    <span id="error-email"></span>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" class="form-control" placeholder="Password">
+                    <span id="error-password"></span>
+                </div>
+            </div>
+            <div class="login-box-footer">
+                <div class="text-right">
+                    <button type="button" class="btn btn-primary btn-submit">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        $('.btn-submit').click(function () {
+            const form = new FormData($('#form-login')[0]);
+            const data = {};
+
+            for (var key of form.keys()) {
+                data[key] = form.get(key);
+            }
+
+            $.ajax({
+                headers: {
+                    'CSRF-Token': "{{ csrfToken }}"
+                },
+                url: `/login-validate`,
+                data: data,
+                type: 'POST',
+                dataType: 'json',
+                beforeSend: function () {
+                    $("[id^=error]").children().remove();
+                },
+                success: function (data) {
+                    $.ajax({
+                        headers: {
+                            'CSRF-Token': "{{ csrfToken }}"
+                        },
+                        url: `/login`,
+                        data: data.body,
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (data) {
+                            window.location.replace('/');
+                        },
+                        error: function (xhr, ajaxOption, thrownError) {
+                            const response = xhr.responseJSON;
+
+                            if (response) {
+                                for (var key in response.messages) {
+                                    var message = response.messages[key];
+
+                                    $('#error-' + key).html(`<p class="small text-danger mt-5">*${message}</p>`)
+                                }
+                            }
+                        }
+                    })
+                },
+                error: function (xhr, ajaxOption, thrownError) {
+                    const response = xhr.responseJSON;
+
+                    for (var key in response.messages) {
+                        var message = response.messages[key];
+
+                        $('#error-' + key).html(`<p class="small text-danger mt-5">*${message}</p>`)
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

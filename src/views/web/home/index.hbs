@@ -1,0 +1,414 @@
+<html>
+
+<head>
+    <title>Timedoor Challenge - Level 8</title>
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/tmdrPreset.css">
+    <!-- CSS End -->
+    <!-- Javascript -->
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/moment.js"></script>
+    <!-- Javascript End -->
+</head>
+
+<body class="bg-lgray">
+    <header>
+        <nav class="navbar navbar-default" role="navigation">
+            <div class="container">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <h2 class="font16 text-green mt-15"><b>Timedoor 30 Challenge Programmer</b></h2>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav navbar-right">
+                        {{#if user}}
+                        <li><a href="/logout">Logout</a></li>
+                        {{else}}
+                        <li><a href="/login">Login</a></li>
+                        <li><a href="/register">Register</a></li>
+                        {{/if}}
+                    </ul>
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+    </header>
+    <main>
+        <div class="section">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6 col-md-offset-3 bg-white p-30 box">
+                        <div class="text-center">
+                            <h1 class="text-green mb-30"><b>Level 8 Challenge</b></h1>
+                        </div>
+                        <form id="form-submit" action="/" method="post">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" class="form-control" name="name" value="{{user.name}}">
+                                <span id="error-name"></span>
+                            </div>
+                            <div class="form-group">
+                                <label>Title</label>
+                                <input type="text" class="form-control" name="title">
+                                <span id="error-title"></span>
+                            </div>
+                            <div class="form-group">
+                                <label>Body</label>
+                                <textarea rows="5" class="form-control" name="body"></textarea>
+                                <span id="error-body"></span>
+                            </div>
+                            <div class="form-group">
+                                <label>Choose image from your computer :</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control upload-form" value="No file chosen" readonly>
+                                    <span class="input-group-btn">
+                                        <span class="btn btn-default btn-file">
+                                            <i class="fa fa-folder-open"></i>&nbsp;Browse <input id="file" type="file"
+                                                name="image">
+                                        </span>
+                                    </span>
+                                </div>
+                                <span id="error-File"></span>
+                            </div>
+                            {{#if user}}
+                            {{else}}
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" class="form-control" name="password">
+                            </div>
+                            {{/if}}
+                            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                            <div class="text-center mt-30 mb-30">
+                                <button id="btn-submit" class="btn btn-primary" type="button">Submit</button>
+                            </div>
+                        </form>
+                        <hr>
+                        {{#each bulletins.items}}
+                        <div class="post">
+                            <div class="clearfix">
+                                <div class="pull-left">
+                                    <h2 class="mb-5 text-green"><b>{{ this.name }} {{#if user}} (ID: {{ this.user.id }})
+                                            {{/if}}</b></h2>
+                                </div>
+                                <div class="pull-right text-right">
+                                    <p class="text-lgray">05-05-2019<br /><span class="small">14:00</span></p>
+                                </div>
+                            </div>
+                            <h4 class="mb-20">{{ this.title }}</h4>
+                            <p class="mb-10">{{ this.body }}</p>
+                            {{#if this.image}}
+                            <div class="img-box my-10">
+                                <img class="img-responsive img-post" style="height: auto !important; max-width: 50%"
+                                    src="upload/{{ this.image }}" alt="image">
+                            </div>
+                            {{/if}}
+
+                            {{#if this.isOwned}}
+                            {{#if this.user}}
+                            <a type="button" class="btn btn-default mb-2 btn-edit" data-type="edit"
+                                data-id="{{ this.id }}" data-name="{{ this.name }}" data-title="{{ this.title }}" data-body="{{ this.body }}" data-image="{{ this.image }}"><i class="fa fa-pencil p-3"></i></a>
+                            <a type="button" class="btn btn-danger mb-2 btn-delete" data-type="delete"
+                                data-id="{{ this.id }}"><i class="fa fa-trash p-3"></i></a>
+                            {{else if this.password}}
+                            <form class="form-inline mt-50">
+                                <div class="form-group mx-sm-3 mb-2">
+                                    <label class="sr-only">Password</label>
+                                    <input type="password" class="form-control" name="password" placeholder="Password">
+                                </div>
+                                <a type="button" class="btn btn-default mb-2 btn-password" data-type="edit"
+                                    data-id="{{ this.id }}"><i class="fa fa-pencil p-3"></i></a>
+                                <a type="button" class="btn btn-danger mb-2 btn-password" data-type="delete"
+                                    data-id="{{ this.id }}"><i class="fa fa-trash p-3"></i></a>
+                            </form>
+                            <span class="error-password-{{ this.id }}"></span>
+                            {{/if}}
+                            {{/if}}
+                        </div>
+                        {{/each}}
+                        <div class="text-center mt-30">
+                            <nav>
+                                <ul class="pagination">
+                                    {{#paginate bulletins.meta bulletins.links.first}}
+                                    {{/paginate}}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p class="font12">Copyright &copy;
+            <script>
+                document.write(new Date().getFullYear());
+            </script> by <a href="https://timedoor.net" class="text-green">PT. TIMEDOOR INDONESIA</a>
+        </p>
+    </footer>
+
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span
+                            aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Edit Item</h4>
+                </div>
+                <form id="form-edit">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" class="form-control" name="name">
+                            <span class="error-name"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" class="form-control" name="title">
+                            <span class="error-title"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Body</label>
+                            <textarea rows="5" name="body" class="form-control"></textarea>
+                            <span class="error-body"></span>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-4">
+                                <img class="img-responsive" alt="" id="image-preview" src="">
+                            </div>
+                            <div class="col-md-8 pl-0">
+                                <label>Choose image from your computer :</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control upload-form" value="No file chosen" readonly>
+                                    <span class="input-group-btn">
+                                        <span class="btn btn-default btn-file">
+                                            <i class="fa fa-folder-open"></i>&nbsp;Browse <input type="file"
+                                                name="image" multiple>
+                                        </span>
+                                    </span>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" name="deleteImage">Delete image
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        {{!-- <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" class="form-control" name="password">
+                        </div> --}}
+                    </div>
+                    <div class="modal-footer">
+                        <input type="hidden" name="id" id="id">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary btn-update">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span
+                            aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Delete Data</h4>
+                </div>
+                <div class="modal-body pad-20">
+                    <p>Are you sure want to delete this item?</p>
+                </div>
+                <form action="" method="post" id="form-delete">
+                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // INPUT TYPE FILE
+        $(document).on('change', '.btn-file :file', function () {
+            var input = $(this),
+                numFiles = input.get(0).files ? input.get(0).files.length : 1,
+                label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+            input.trigger('fileselect', [numFiles, label]);
+        });
+
+        $(document).ready(function () {
+            $('.btn-file :file').on('fileselect', function (event, numFiles, label) {
+                var input = $(this).parents('.input-group').find(':text'),
+                    log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+                if (input.length) {
+                    input.val(log);
+                } else {
+                    if (log) alert(log);
+                }
+            });
+        });
+
+        const checkPassword = (id, password, type) => {
+            $.ajax({
+                headers: {
+                    'CSRF-Token': "{{ csrfToken }}"
+                },
+                url: `/${id}/check-password`,
+                data: { password },
+                type: 'POST',
+                dataType: 'json',
+                beforeSend: function () {
+                    $("[class^=error-password]").children().remove();
+                },
+                success: function (data) {
+                    if (type == 'edit') handleEdit(data);
+                    else if (type == 'delete') handleDelete(data.id);
+                },
+                error: function (xhr, ajaxOption, thrownError) {
+                    const response = xhr.responseJSON;
+
+                    if (response) {
+                        for (var key in response.messages) {
+                            var message = response.messages[key];
+
+                            $('.error-' + key + '-' + id).html(`<p class="small text-danger mt-5">*${message}</p>`)
+                        }
+                    }
+
+                }
+            });
+        }
+
+        const handleEdit = (data) => {
+            $('#form-edit input[name="name"]').val(data.name);
+            $('#form-edit input[name="title"]').val(data.title);
+            $('#form-edit input[name="id"]').val(data.id);
+            $('#form-edit textarea[name="body"]').val(data.body);
+            $('#image-preview').attr('src', data.image ? `upload/${data.image}` : 'https://via.placeholder.com/500x500')
+
+            $('#editModal').modal();
+        }
+
+        const handleDelete = (id) => {
+            const url = `/${id}/delete`;
+
+            console.log(url);
+
+            $('#form-delete').attr('action', url);
+
+            $('#deleteModal').modal();
+        }
+
+        $('.btn-edit').click(function () {
+            let id = $(this).data('id');
+            let name = $(this).data('name');
+            let title = $(this).data('title');
+            let body = $(this).data('body');
+            let image = $(this).data('image');
+
+            const data = {
+                id, name, title, body, image
+            }
+
+            handleEdit(data);
+        })
+
+        $('.btn-delete').click(function () {
+            const id = $(this).data('id');
+
+            handleDelete(id);
+        });
+
+        $('.btn-password').click(function () {
+            const id = $(this).data('id');
+            const type = $(this).data('type');
+            const password = $(this).parent().find("input[name='password']").val();
+
+            checkPassword(id, password, type);
+        });
+
+        $('#btn-submit').click(function () {
+            const form = new FormData($('#form-submit')[0]);
+
+            $.ajax({
+                headers: {
+                    'CSRF-Token': "{{ csrfToken }}"
+                },
+                url: '/',
+                data: form,
+                contentType: false,
+                processData: false,
+                type: 'POST',
+                beforeSend: function () {
+                    $("[id^=error]").children().remove();
+                },
+                success: function (data) {
+                    location.reload();
+                },
+                error: function (xhr, ajaxOption, thrownError) {
+                    const response = xhr.responseJSON;
+
+                    console.log(response)
+
+                    for (var key in response.messages) {
+                        var message = response.messages[key];
+
+                        $('#error-' + key).html(`<p class="small text-danger mt-5">*${message}</p>`)
+                    }
+                }
+            });
+        });
+
+        $('.btn-update').click(function () {
+            const form = new FormData($('#form-edit')[0]);
+
+            console.log(form.get('name'));
+
+            $.ajax({
+                headers: {
+                    'CSRF-Token': "{{ csrfToken }}"
+                },
+                url: `/${form.get('id')}/update`,
+                data: form,
+                type: 'POST',
+                contentType: false,
+                processData: false,
+                beforeSend: function () {
+                    $("[id^=error]").children().remove();
+                },
+                success: function (data) {
+                    location.reload();
+                },
+                error: function (xhr, ajaxOption, thrownError) {
+                    const response = xhr.responseJSON;
+
+                    for (var key in response.messages) {
+                        var message = response.messages[key];
+
+                        $('#form-edit .error-' + key).html(`<p class="small text-danger mt-5">*${message}</p>`)
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
